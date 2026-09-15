@@ -46,6 +46,20 @@ export function FeeCalculator() {
       }),
     [notional, scenario, hedge, dest, dailyLots, btcPrice, leverage, movePct],
   )
+  const quote100k = useMemo(
+    () =>
+      quoteRail({
+        notional: 100_000,
+        scenario,
+        hedge,
+        dest,
+        dailyLots: 1,
+        btcPrice,
+        leverage,
+        unhedgedMovePct: movePct,
+      }),
+    [scenario, hedge, dest, btcPrice, leverage, movePct],
+  )
 
   const inputInvalid = !Number.isFinite(notional) || notional <= 0
 
@@ -80,10 +94,11 @@ export function FeeCalculator() {
               onValueChange={(value) => setNotional(firstValue(value, notional))}
             />
             <div className="flex flex-wrap gap-2">
-              {PRESETS.map((p) => (
+                  {PRESETS.map((p) => (
                 <button
                   key={p}
                   type="button"
+                  data-testid={`preset-${p}`}
                   onClick={() => setNotional(p)}
                   className={cn(
                     "rounded-full border px-3 py-1 text-xs transition-colors",
@@ -105,6 +120,7 @@ export function FeeCalculator() {
                 <button
                   key={s.id}
                   type="button"
+                  data-testid={`scenario-${s.id}`}
                   onClick={() => setScenarioId(s.id)}
                   className={cn(
                     "rounded-xl border px-3 py-2.5 text-left transition-colors",
@@ -123,11 +139,19 @@ export function FeeCalculator() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex items-center justify-between rounded-xl border border-border px-3 py-3">
-              <div>
+              <button
+                type="button"
+                onClick={() => setHedge((on) => !on)}
+                className="text-left"
+                data-testid="hedge-toggle"
+              >
                 <div className="text-sm font-medium">Delta-neutral hedge</div>
                 <div className="text-xs text-muted-foreground">Short perp vs BTC in transit</div>
-              </div>
-              <Switch checked={hedge} onCheckedChange={setHedge} />
+              </button>
+              <Switch
+                checked={hedge}
+                onCheckedChange={(checked) => setHedge(Boolean(checked))}
+              />
             </div>
             <div className="space-y-2">
               <Label>Destination asset</Label>
@@ -136,6 +160,7 @@ export function FeeCalculator() {
                   <button
                     key={asset}
                     type="button"
+                    data-testid={`dest-${asset}`}
                     onClick={() => setDest(asset)}
                     className={cn(
                       "rounded-xl border px-3 py-2 text-sm",
@@ -216,7 +241,10 @@ export function FeeCalculator() {
                   </Badge>
                   <Badge variant="outline">{dest} out</Badge>
                 </div>
-                <CardTitle className="pt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                <CardTitle
+                  data-testid="net-received"
+                  className="pt-2 text-3xl font-semibold tracking-tight sm:text-4xl"
+                >
                   {usdt(quote.net)} {dest}
                 </CardTitle>
                 <CardDescription>
@@ -226,9 +254,9 @@ export function FeeCalculator() {
               </CardHeader>
               <CardContent className="grid gap-4 pt-4 sm:grid-cols-3">
                 <Stat
-                  label="Per 100,000 USDT"
-                  value={`${usdt(100_000 - quote.per100k)} out`}
-                  hint={`${money(quote.per100k)} lost`}
+                  label="If you sent 100,000"
+                  value={`${usdt(quote100k?.net ?? 0)} out`}
+                  hint={`${money(quote100k?.totalCost ?? 0)} lost, flat withdrawal included`}
                 />
                 <Stat
                   label="This lot in BTC"
@@ -318,12 +346,14 @@ export function FeeCalculator() {
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
                   <p>
-                    <span className="text-foreground">100,000 USDT in → {usdt(100_000 - quote.per100k)} {dest} out.</span>{" "}
+                    <span className="text-foreground">
+                      100,000 USDT in → {usdt(quote100k?.net ?? 0)} {dest} out.
+                    </span>{" "}
                     Landing at 99,990 (1 bp) would require skipping two conversions. This BTC rail does not do that.
                   </p>
                   <p className="flex items-center gap-2 text-foreground">
                     <ArrowRight className="size-4 text-primary" />
-                    Plan for {pct(quote.haircutPct, 2)} all-in, not 0.01%.
+                    Plan for {pct(quote100k?.haircutPct ?? quote.haircutPct, 2)} all-in, not 0.01%.
                   </p>
                 </CardContent>
               </Card>
