@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 43187",
     "build": "next build",
+    "build:pages": "NEXT_OUTPUT=export next build",
     "start": "next start --hostname 0.0.0.0 --port 43187",
     "lint": "eslint"
   },

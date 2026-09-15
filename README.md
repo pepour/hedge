@@ -59,6 +59,27 @@ git pull
 docker compose up -d --build
 ```
 
+## GitHub Pages
+
+The site is a static export. After this repo is on GitHub (`pepour/hedge`):
+
+1. **Settings → Pages → Build and deployment → Source:** GitHub Actions
+2. Push `main` (or run the **GitHub Pages** workflow by hand)
+
+The live URL is:
+
+**https://pepour.github.io/hedge/**
+
+The workflow sets `BASE_PATH=/hedge` so assets load under that project path. For a custom domain or a user site (`username.github.io`), set the repo Actions variable `BASE_PATH` to empty.
+
+Local static build:
+
+```bash
+npm run build:pages
+```
+
+Output is in `out/`.
+
 ## How to read the calculator
 
 1. Set the USDT lot size (presets include 100k and 2–3M).
