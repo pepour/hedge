@@ -1,0 +1,11 @@
+.git
+.gitignore
+.next
+node_modules
+agent-tools
+terminals
+*.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+.cursor

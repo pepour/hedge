@@ -26,6 +26,39 @@ npm run build
 npm start
 ```
 
+## Deploy with Docker Compose
+
+On the server (Docker Engine + Compose plugin):
+
+```bash
+git clone <this-repo>
+cd <repo>
+docker compose up -d --build
+```
+
+Then open `http://SERVER_IP` (port **80**).
+
+Use another host port if 80 is taken:
+
+```bash
+HOST_PORT=43187 docker compose up -d --build
+```
+
+Useful commands:
+
+```bash
+docker compose logs -f web
+docker compose ps
+docker compose down
+```
+
+Rebuild after a code pull:
+
+```bash
+git pull
+docker compose up -d --build
+```
+
 ## How to read the calculator
 
 1. Set the USDT lot size (presets include 100k and 2–3M).
